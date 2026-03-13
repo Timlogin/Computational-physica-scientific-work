@@ -23,3 +23,7 @@ target_link_libraries(sample_cubic3d ${VTK_LIBRARIES})
 
 target_link_libraries(sample_tetr3d ${VTK_LIBRARIES})
 target_link_libraries(sample_tetr3d ${GMSH_LIBRARIES})
+
+add_executable(hw_stl_obj_3D hw_stl_obj_3D.cpp)
+target_link_libraries(hw_stl_obj_3D ${VTK_LIBRARIES})
+target_link_libraries(hw_stl_obj_3D ${GMSH_LIBRARIES})
