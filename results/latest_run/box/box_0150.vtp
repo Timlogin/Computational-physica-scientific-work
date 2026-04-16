@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian">
+  <PolyData>
+    <Piece NumberOfPoints="8" NumberOfVerts="0" NumberOfLines="0" NumberOfStrips="0" NumberOfPolys="6">
+      <Points>
+        <DataArray type="Float64" NumberOfComponents="3" format="ascii">
+          -2.000613 -0.999770 -0.054789
+          1.999387 -0.999770 -0.054789
+          1.999387 1.000230 -0.054789
+          -2.000613 1.000230 -0.054789
+          -2.000613 -0.999770 1.745211
+          1.999387 -0.999770 1.745211
+          1.999387 1.000230 1.745211
+          -2.000613 1.000230 1.745211
+        </DataArray>
+      </Points>
+      <CellData Scalars="wall_thickness">
+        <DataArray type="Float64" Name="wall_thickness" format="ascii">
+          0.060000
+          0.060000
+          0.060000
+          0.060000
+          0.060000
+          0.060000
+        </DataArray>
+        <DataArray type="Float64" Name="density" format="ascii">
+          550.000000
+          550.000000
+          550.000000
+          550.000000
+          550.000000
+          550.000000
+        </DataArray>
+        <DataArray type="Float64" Name="mass" format="ascii">
+          1179.974400
+          1179.974400
+          1179.974400
+          1179.974400
+          1179.974400
+          1179.974400
+        </DataArray>
+        <DataArray type="Float64" Name="speed" format="ascii">
+          0.324319
+          0.324319
+          0.324319
+          0.324319
+          0.324319
+          0.324319
+        </DataArray>
+      </CellData>
+      <Polys>
+        <DataArray type="Int32" Name="connectivity" format="ascii">
+          0 1 2 3
+          4 5 6 7
+          0 1 5 4
+          1 2 6 5
+          2 3 7 6
+          3 0 4 7
+        </DataArray>
+        <DataArray type="Int32" Name="offsets" format="ascii">
+          4
+          8
+          12
+          16
+          20
+          24
+        </DataArray>
+      </Polys>
+    </Piece>
+  </PolyData>
+</VTKFile>
