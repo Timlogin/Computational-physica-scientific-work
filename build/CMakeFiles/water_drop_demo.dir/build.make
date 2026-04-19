@@ -86,10 +86,24 @@ CMakeFiles/water_drop_demo.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/water_drop_demo.dir/src/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/main.cpp -o CMakeFiles/water_drop_demo.dir/src/main.cpp.s
 
+CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o: CMakeFiles/water_drop_demo.dir/flags.make
+CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o: /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/gmsh_box.cpp
+CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o: CMakeFiles/water_drop_demo.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o -MF CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o.d -o CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o -c /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/gmsh_box.cpp
+
+CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/gmsh_box.cpp > CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.i
+
+CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/gmsh_box.cpp -o CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.s
+
 CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o: CMakeFiles/water_drop_demo.dir/flags.make
 CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o: /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/simulation.cpp
 CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o: CMakeFiles/water_drop_demo.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o -MF CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o.d -o CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o -c /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/simulation.cpp
 
 CMakeFiles/water_drop_demo.dir/src/simulation.cpp.i: cmake_force
@@ -103,7 +117,7 @@ CMakeFiles/water_drop_demo.dir/src/simulation.cpp.s: cmake_force
 CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o: CMakeFiles/water_drop_demo.dir/flags.make
 CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o: /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/vtk_writer.cpp
 CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o: CMakeFiles/water_drop_demo.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o -MF CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o.d -o CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o -c /Users/timofejloginov/Documents/Computational-physica-scientific-work/src/vtk_writer.cpp
 
 CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.i: cmake_force
@@ -117,6 +131,7 @@ CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.s: cmake_force
 # Object files for target water_drop_demo
 water_drop_demo_OBJECTS = \
 "CMakeFiles/water_drop_demo.dir/src/main.cpp.o" \
+"CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o" \
 "CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o" \
 "CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o"
 
@@ -124,11 +139,13 @@ water_drop_demo_OBJECTS = \
 water_drop_demo_EXTERNAL_OBJECTS =
 
 water_drop_demo: CMakeFiles/water_drop_demo.dir/src/main.cpp.o
+water_drop_demo: CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o
 water_drop_demo: CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o
 water_drop_demo: CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o
 water_drop_demo: CMakeFiles/water_drop_demo.dir/build.make
+water_drop_demo: /opt/homebrew/lib/libgmsh.dylib
 water_drop_demo: CMakeFiles/water_drop_demo.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable water_drop_demo"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable water_drop_demo"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/water_drop_demo.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

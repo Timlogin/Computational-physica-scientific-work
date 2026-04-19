@@ -1,1 +1,1 @@
-/usr/bin/c++ -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/water_drop_demo.dir/src/main.cpp.o CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o -o water_drop_demo
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/water_drop_demo.dir/src/main.cpp.o CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o -o water_drop_demo  /opt/homebrew/lib/libgmsh.dylib

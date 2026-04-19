@@ -1,0 +1,1 @@
+/usr/bin/c++  -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/box_mesh_preview.dir/src/box_mesh_preview.cpp.o CMakeFiles/box_mesh_preview.dir/src/gmsh_box.cpp.o CMakeFiles/box_mesh_preview.dir/src/simulation.cpp.o CMakeFiles/box_mesh_preview.dir/src/vtk_writer.cpp.o -o box_mesh_preview  /opt/homebrew/lib/libgmsh.dylib

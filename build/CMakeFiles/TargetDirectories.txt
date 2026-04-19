@@ -1,3 +1,4 @@
 /Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles/water_drop_demo.dir
+/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles/box_mesh_preview.dir
 /Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles/edit_cache.dir
 /Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles/rebuild_cache.dir

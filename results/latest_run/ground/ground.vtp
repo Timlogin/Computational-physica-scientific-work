@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian">
+  <PolyData>
+    <Piece NumberOfPoints="4" NumberOfVerts="0" NumberOfLines="0" NumberOfStrips="0" NumberOfPolys="1">
+      <Points>
+        <DataArray type="Float64" NumberOfComponents="3" format="ascii">
+          -7.000000 -5.000000 0.000000
+          7.000000 -5.000000 0.000000
+          7.000000 5.000000 0.000000
+          -7.000000 5.000000 0.000000
+        </DataArray>
+      </Points>
+      <CellData Scalars="normal_stiffness">
+        <DataArray type="Float64" Name="normal_stiffness" format="ascii">
+          280000.000000
+        </DataArray>
+        <DataArray type="Float64" Name="lateral_stiffness" format="ascii">
+          120000.000000
+        </DataArray>
+        <DataArray type="Float64" Name="max_sink" format="ascii">
+          0.030000
+        </DataArray>
+        <DataArray type="UInt8" Name="ground_rgb" NumberOfComponents="3" format="ascii">
+          82 122 74
+        </DataArray>
+      </CellData>
+      <Polys>
+        <DataArray type="Int32" Name="connectivity" format="ascii">
+          0 1 2 3
+        </DataArray>
+        <DataArray type="Int32" Name="offsets" format="ascii">
+          4
+        </DataArray>
+      </Polys>
+    </Piece>
+  </PolyData>
+</VTKFile>

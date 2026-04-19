@@ -1,4 +1,6 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o"
+  "CMakeFiles/water_drop_demo.dir/src/gmsh_box.cpp.o.d"
   "CMakeFiles/water_drop_demo.dir/src/main.cpp.o"
   "CMakeFiles/water_drop_demo.dir/src/main.cpp.o.d"
   "CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o"
