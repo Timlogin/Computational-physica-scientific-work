@@ -144,6 +144,16 @@ box_mesh_preview: CMakeFiles/box_mesh_preview.dir/src/simulation.cpp.o
 box_mesh_preview: CMakeFiles/box_mesh_preview.dir/src/vtk_writer.cpp.o
 box_mesh_preview: CMakeFiles/box_mesh_preview.dir/build.make
 box_mesh_preview: /opt/homebrew/lib/libgmsh.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkIOXML-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkIOXMLParser-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkCommonExecutionModel-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkCommonDataModel-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkCommonTransforms-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkCommonMath-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkCommonCore-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtksys-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtktoken-9.5.9.5.dylib
+box_mesh_preview: /opt/homebrew/lib/libvtkkissfft-9.5.9.5.dylib
 box_mesh_preview: CMakeFiles/box_mesh_preview.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable box_mesh_preview"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/box_mesh_preview.dir/link.txt --verbose=$(VERBOSE)

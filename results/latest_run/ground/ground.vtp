@@ -1,34 +1,68 @@
 <?xml version="1.0"?>
-<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian">
+<VTKFile type="PolyData" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
   <PolyData>
     <Piece NumberOfPoints="4" NumberOfVerts="0" NumberOfLines="0" NumberOfStrips="0" NumberOfPolys="1">
-      <Points>
-        <DataArray type="Float64" NumberOfComponents="3" format="ascii">
-          -7.000000 -5.000000 0.000000
-          7.000000 -5.000000 0.000000
-          7.000000 5.000000 0.000000
-          -7.000000 5.000000 0.000000
+      <PointData>
+      </PointData>
+      <CellData>
+        <DataArray type="Float64" Name="normal_stiffness" format="ascii" RangeMin="280000" RangeMax="280000">
+          280000
         </DataArray>
-      </Points>
-      <CellData Scalars="normal_stiffness">
-        <DataArray type="Float64" Name="normal_stiffness" format="ascii">
-          280000.000000
+        <DataArray type="Float64" Name="lateral_stiffness" format="ascii" RangeMin="120000" RangeMax="120000">
+          120000
         </DataArray>
-        <DataArray type="Float64" Name="lateral_stiffness" format="ascii">
-          120000.000000
+        <DataArray type="Float64" Name="max_sink" format="ascii" RangeMin="0.03" RangeMax="0.03">
+          0.03
         </DataArray>
-        <DataArray type="Float64" Name="max_sink" format="ascii">
-          0.030000
-        </DataArray>
-        <DataArray type="UInt8" Name="ground_rgb" NumberOfComponents="3" format="ascii">
+        <DataArray type="UInt8" Name="ground_rgb" NumberOfComponents="3" format="ascii" RangeMin="164.57217261736565" RangeMax="164.57217261736565">
           82 122 74
+          <InformationKey name="L2_NORM_RANGE" location="vtkDataArray" length="2">
+            <Value index="0">
+              164.57217262
+            </Value>
+            <Value index="1">
+              164.57217262
+            </Value>
+          </InformationKey>
         </DataArray>
       </CellData>
+      <Points>
+        <DataArray type="Float32" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="8.602325267042627" RangeMax="8.602325267042627">
+          -7 -5 0 7 -5 0
+          7 5 0 -7 5 0
+          <InformationKey name="L2_NORM_RANGE" location="vtkDataArray" length="2">
+            <Value index="0">
+              8.602325267
+            </Value>
+            <Value index="1">
+              8.602325267
+            </Value>
+          </InformationKey>
+        </DataArray>
+      </Points>
+      <Verts>
+        <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="1e+299" RangeMax="-1e+299">
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="1e+299" RangeMax="-1e+299">
+        </DataArray>
+      </Verts>
+      <Lines>
+        <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="1e+299" RangeMax="-1e+299">
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="1e+299" RangeMax="-1e+299">
+        </DataArray>
+      </Lines>
+      <Strips>
+        <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="1e+299" RangeMax="-1e+299">
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="1e+299" RangeMax="-1e+299">
+        </DataArray>
+      </Strips>
       <Polys>
-        <DataArray type="Int32" Name="connectivity" format="ascii">
+        <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="0" RangeMax="3">
           0 1 2 3
         </DataArray>
-        <DataArray type="Int32" Name="offsets" format="ascii">
+        <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="4" RangeMax="4">
           4
         </DataArray>
       </Polys>

@@ -144,6 +144,16 @@ water_drop_demo: CMakeFiles/water_drop_demo.dir/src/simulation.cpp.o
 water_drop_demo: CMakeFiles/water_drop_demo.dir/src/vtk_writer.cpp.o
 water_drop_demo: CMakeFiles/water_drop_demo.dir/build.make
 water_drop_demo: /opt/homebrew/lib/libgmsh.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkIOXML-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkIOXMLParser-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkCommonExecutionModel-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkCommonDataModel-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkCommonTransforms-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkCommonMath-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkCommonCore-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtksys-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtktoken-9.5.9.5.dylib
+water_drop_demo: /opt/homebrew/lib/libvtkkissfft-9.5.9.5.dylib
 water_drop_demo: CMakeFiles/water_drop_demo.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/timofejloginov/Documents/Computational-physica-scientific-work/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable water_drop_demo"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/water_drop_demo.dir/link.txt --verbose=$(VERBOSE)

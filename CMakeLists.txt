@@ -6,6 +6,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(VTK REQUIRED COMPONENTS
+  CommonCore
+  CommonDataModel
+  IOXML
+)
+
 find_path(GMSH_INCLUDE_DIR gmsh.h
   PATHS
     /opt/homebrew/include
@@ -42,6 +48,13 @@ target_include_directories(box_mesh_preview PRIVATE ${GMSH_INCLUDE_DIR})
 
 target_link_libraries(water_drop_demo PRIVATE ${GMSH_LIBRARY})
 target_link_libraries(box_mesh_preview PRIVATE ${GMSH_LIBRARY})
+target_link_libraries(water_drop_demo PRIVATE VTK::CommonCore VTK::CommonDataModel VTK::IOXML)
+target_link_libraries(box_mesh_preview PRIVATE VTK::CommonCore VTK::CommonDataModel VTK::IOXML)
+
+vtk_module_autoinit(
+  TARGETS water_drop_demo box_mesh_preview
+  MODULES VTK::CommonCore VTK::CommonDataModel VTK::IOXML
+)
 
 if(MSVC)
   target_compile_options(water_drop_demo PRIVATE /W4)
