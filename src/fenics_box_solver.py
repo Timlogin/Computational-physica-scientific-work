@@ -3,35 +3,44 @@ from __future__ import annotations
 import csv
 import math
 import sys
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import basix.ufl
 import numpy as np
 import ufl
+import vtk
 from mpi4py import MPI
+from vtk.util import numpy_support
 
 from dolfinx import fem, mesh
 from dolfinx.fem.petsc import LinearProblem
 
 
 def parse_vtu_mesh(path: Path) -> tuple[np.ndarray, np.ndarray]:
-    """Читает узлы и тетраэдры из ASCII VTU-файла."""
-    root = ET.parse(path).getroot()
-    piece = root.find(".//Piece")
-    if piece is None:
-      raise RuntimeError(f"VTU mesh piece not found in {path}")
+    """Читает узлы и тетраэдры из VTU через VTK API."""
+    reader = vtk.vtkXMLUnstructuredGridReader()
+    reader.SetFileName(str(path))
+    reader.Update()
 
-    points_text = piece.find("./Points/DataArray")
-    if points_text is None or points_text.text is None:
-      raise RuntimeError(f"VTU points not found in {path}")
+    grid = reader.GetOutput()
+    if grid is None or grid.GetNumberOfPoints() == 0:
+        raise RuntimeError(f"VTU points not found in {path}")
 
-    cells_text = piece.find("./Cells/DataArray[@Name='connectivity']")
-    if cells_text is None or cells_text.text is None:
-      raise RuntimeError(f"VTU connectivity not found in {path}")
+    points = numpy_support.vtk_to_numpy(grid.GetPoints().GetData()).astype(np.float64)
 
-    points = np.fromstring(points_text.text, sep=" ", dtype=np.float64).reshape(-1, 3)
-    cells = np.fromstring(cells_text.text, sep=" ", dtype=np.int64).reshape(-1, 4)
+    cells = []
+    for cell_id in range(grid.GetNumberOfCells()):
+        cell = grid.GetCell(cell_id)
+        if cell.GetCellType() != vtk.VTK_TETRA:
+            continue
+
+        ids = cell.GetPointIds()
+        cells.append([ids.GetId(0), ids.GetId(1), ids.GetId(2), ids.GetId(3)])
+
+    if not cells:
+        raise RuntimeError(f"VTU tetra connectivity not found in {path}")
+
+    cells = np.array(cells, dtype=np.int64)
     return points, cells
 
 
@@ -61,62 +70,55 @@ def write_box_vtu(
     floor_deflection: float,
     side_deflection: float,
 ):
-    """Записывает деформированный бокс в VTU-файл."""
+    """Записывает деформированный бокс в VTU-файл через VTK API."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as out:
-        out.write('<?xml version="1.0"?>\n')
-        out.write('<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian">\n')
-        out.write("  <UnstructuredGrid>\n")
-        out.write(f'    <Piece NumberOfPoints="{len(points)}" NumberOfCells="{len(cells)}">\n')
-        out.write("      <Points>\n")
-        out.write('        <DataArray type="Float64" NumberOfComponents="3" format="ascii">\n')
-        for point in points:
-            out.write(f"          {point[0]:.6f} {point[1]:.6f} {point[2]:.6f}\n")
-        out.write("        </DataArray>\n")
-        out.write("      </Points>\n")
+    grid = vtk.vtkUnstructuredGrid()
+    vtk_points = vtk.vtkPoints()
 
-        out.write('      <CellData Scalars="wall_thickness">\n')
-        for name, value in [
-            ("wall_thickness", wall_thickness),
-            ("density", density),
-            ("mass", 0.0),
-            ("speed", speed),
-            ("roof_deflection", roof_deflection),
-            ("roof_center_x", roof_center_x),
-            ("roof_center_y", roof_center_y),
-            ("floor_deflection", floor_deflection),
-            ("side_deflection", side_deflection),
-        ]:
-            out.write(f'        <DataArray type="Float64" Name="{name}" format="ascii">\n')
-            for _ in range(len(cells)):
-                out.write(f"          {value:.6f}\n")
-            out.write("        </DataArray>\n")
+    for point in points:
+        vtk_points.InsertNextPoint(float(point[0]), float(point[1]), float(point[2]))
 
-        out.write('        <DataArray type="UInt8" Name="box_rgb" NumberOfComponents="3" format="ascii">\n')
+    grid.SetPoints(vtk_points)
+
+    for tet in cells:
+        vtk_tet = vtk.vtkTetra()
+        vtk_tet.GetPointIds().SetId(0, int(tet[0]))
+        vtk_tet.GetPointIds().SetId(1, int(tet[1]))
+        vtk_tet.GetPointIds().SetId(2, int(tet[2]))
+        vtk_tet.GetPointIds().SetId(3, int(tet[3]))
+        grid.InsertNextCell(vtk_tet.GetCellType(), vtk_tet.GetPointIds())
+
+    def make_cell_scalar_array(name: str, value: float) -> vtk.vtkDoubleArray:
+        array = vtk.vtkDoubleArray()
+        array.SetName(name)
         for _ in range(len(cells)):
-            out.write(f"          {box_rgb[0]} {box_rgb[1]} {box_rgb[2]}\n")
-        out.write("        </DataArray>\n")
-        out.write("      </CellData>\n")
+            array.InsertNextValue(float(value))
+        return array
 
-        out.write("      <Cells>\n")
-        out.write('        <DataArray type="Int32" Name="connectivity" format="ascii">\n')
-        for tet in cells:
-            out.write(f"          {tet[0]} {tet[1]} {tet[2]} {tet[3]}\n")
-        out.write("        </DataArray>\n")
+    grid.GetCellData().AddArray(make_cell_scalar_array("wall_thickness", wall_thickness))
+    grid.GetCellData().AddArray(make_cell_scalar_array("density", density))
+    grid.GetCellData().AddArray(make_cell_scalar_array("mass", 0.0))
+    grid.GetCellData().AddArray(make_cell_scalar_array("speed", speed))
+    grid.GetCellData().AddArray(make_cell_scalar_array("roof_deflection", roof_deflection))
+    grid.GetCellData().AddArray(make_cell_scalar_array("roof_center_x", roof_center_x))
+    grid.GetCellData().AddArray(make_cell_scalar_array("roof_center_y", roof_center_y))
+    grid.GetCellData().AddArray(make_cell_scalar_array("floor_deflection", floor_deflection))
+    grid.GetCellData().AddArray(make_cell_scalar_array("side_deflection", side_deflection))
 
-        out.write('        <DataArray type="Int32" Name="offsets" format="ascii">\n')
-        for i in range(1, len(cells) + 1):
-            out.write(f"          {4 * i}\n")
-        out.write("        </DataArray>\n")
+    rgb = vtk.vtkUnsignedCharArray()
+    rgb.SetName("box_rgb")
+    rgb.SetNumberOfComponents(3)
+    color = [int(box_rgb[0]), int(box_rgb[1]), int(box_rgb[2])]
+    for _ in range(len(cells)):
+        rgb.InsertNextTypedTuple(color)
+    grid.GetCellData().AddArray(rgb)
 
-        out.write('        <DataArray type="UInt8" Name="types" format="ascii">\n')
-        for _ in range(len(cells)):
-            out.write("          10\n")
-        out.write("        </DataArray>\n")
-        out.write("      </Cells>\n")
-        out.write("    </Piece>\n")
-        out.write("  </UnstructuredGrid>\n")
-        out.write("</VTKFile>\n")
+    writer = vtk.vtkXMLUnstructuredGridWriter()
+    writer.SetFileName(str(path))
+    writer.SetInputData(grid)
+    writer.SetDataModeToAscii()
+    if writer.Write() == 0:
+        raise RuntimeError(f"Could not write VTU file for box: {path}")
 
 
 def write_box_pvd(path: Path, frames: list[dict[str, float]]):
