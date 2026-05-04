@@ -201,11 +201,14 @@ def compute_deformation_metrics(
 def update_crush_state(
     crush_state: dict[str, float],
     metrics: dict[str, float],
-    frame: dict[str, float],
+    roof_load: float,
+    side_x_load: float,
+    side_y_load: float,
+    roof_center_x: float,
+    roof_center_y: float,
 ):
     """Обновляет накопленное смятие, которое уже не должно исчезать в следующих кадрах."""
-    roof_load = float(frame["roof_load"])
-    side_load = max(float(frame["side_x_load"]), float(frame["side_y_load"]))
+    side_load = max(side_x_load, side_y_load)
 
     # Крыша запоминает самый сильный прогиб и дальше уже не распрямляется.
     crush_state["roof_sink"] = max(
@@ -231,8 +234,8 @@ def update_crush_state(
 
     # Запоминаем последнее значимое место удара по крыше.
     if roof_load > 1e-6:
-        crush_state["roof_center_x"] = 0.80 * crush_state["roof_center_x"] + 0.20 * float(frame["roof_center_x"])
-        crush_state["roof_center_y"] = 0.80 * crush_state["roof_center_y"] + 0.20 * float(frame["roof_center_y"])
+        crush_state["roof_center_x"] = 0.80 * crush_state["roof_center_x"] + 0.20 * roof_center_x
+        crush_state["roof_center_y"] = 0.80 * crush_state["roof_center_y"] + 0.20 * roof_center_y
 
 
 def build_permanent_crush_field(
@@ -347,12 +350,22 @@ def main() -> int:
     top_area = max(float(box_size[0] * box_size[1]), 1e-8)
     side_area_x = max(float(box_size[1] * box_size[2]), 1e-8)
     side_area_y = max(float(box_size[0] * box_size[2]), 1e-8)
+    mean_drop_height = max(1.0, 50.5 - z_max)
 
     # Эти коэффициенты переводят короткий удар воды в более заметное смятие упрощённого кузова.
     impact_force_scale = 30.0
     roof_uniform_fraction = 0.55
     roof_patch_fraction = 0.45
     wall_crush_fraction = 0.16
+
+    # Оценка характерного суммарного импульса для 2 тонн воды, падающих с высоты около 50 метров.
+    # Через него будем плавно включать сильное смятие, чтобы кузов не "ломался"
+    # от первых единичных капель ещё до прихода основной массы воды.
+    total_water_mass = 2000.0
+    reference_impact_speed = math.sqrt(2.0 * 9.81 * mean_drop_height)
+    reference_total_impulse = total_water_mass * reference_impact_speed
+    activation_impulse_threshold = 0.08 * reference_total_impulse
+    activation_impulse_span = 0.18 * reference_total_impulse
 
     # Постоянные будут меняться от кадра к кадру без перекомпиляции формы.
     roof_load = fem.Constant(domain, 0.0)
@@ -458,13 +471,59 @@ def main() -> int:
     # Упругая часть тоже остаётся видимой, но уже слабее остаточной
     elastic_visible_fraction = 0.10
 
+    # cumulative_*_impulse — накопленный импульс удара с начала расчёта.
+    # Через эти величины мы понимаем, когда на кузов уже пришла
+    # существенная часть массы воды, а не только первые отдельные частицы.
+    cumulative_roof_impulse = 0.0
+    cumulative_side_x_impulse = 0.0
+    cumulative_side_y_impulse = 0.0
+
+    # previous_frame_time нужен, чтобы восстановить длину интервала кадра
+    # и превратить импульс за кадр в среднюю силу за этот интервал.
+    previous_frame_time = 0.0
+
     for frame in frames:
-        # Эти значения приходят из C++ как эквивалентные нагрузки от воды.
-        roof_load.value = impact_force_scale * float(frame["roof_load"])
+        # C++ отдаёт нам и пиковую нагрузку, и накопленный импульс за интервал кадра.
+        # Импульс здесь более физичен, потому что первые единичные столкновения
+        # уже могут давать большой пик силы, но ещё не должны сминать кузов целиком.
+        frame_time = float(frame["time"])
+        frame_dt = max(frame_time - previous_frame_time, 1.0e-8)
+        previous_frame_time = frame_time
+
+        roof_peak_load = float(frame["roof_load"])
+        roof_frame_impulse = float(frame.get("roof_impulse", 0.0))
+        side_x_peak_load = float(frame["side_x_load"])
+        side_y_peak_load = float(frame["side_y_load"])
+        side_x_frame_impulse = float(frame.get("side_x_impulse", 0.0))
+        side_y_frame_impulse = float(frame.get("side_y_impulse", 0.0))
+
+        cumulative_roof_impulse += roof_frame_impulse
+        cumulative_side_x_impulse += side_x_frame_impulse
+        cumulative_side_y_impulse += side_y_frame_impulse
+
+        activation = np.clip(
+            (cumulative_roof_impulse - activation_impulse_threshold)
+            / max(activation_impulse_span, 1.0e-8),
+            0.0,
+            1.0,
+        )
+
+        # Средняя сила за интервал удара обычно стабильнее и правдоподобнее,
+        # чем один только пиковый шаг. Пик всё же немного сохраняем,
+        # чтобы сильный удар не стал слишком "размазанным".
+        roof_avg_load = roof_frame_impulse / frame_dt
+        side_x_avg_load = side_x_frame_impulse / frame_dt
+        side_y_avg_load = side_y_frame_impulse / frame_dt
+
+        effective_roof_load = activation * (0.25 * roof_peak_load + 0.75 * roof_avg_load)
+        effective_side_x_load = activation * (0.30 * side_x_peak_load + 0.70 * side_x_avg_load)
+        effective_side_y_load = activation * (0.30 * side_y_peak_load + 0.70 * side_y_avg_load)
+
+        roof_load.value = impact_force_scale * effective_roof_load
         roof_center_x.value = float(frame["roof_center_x"])
         roof_center_y.value = float(frame["roof_center_y"])
-        side_x_load.value = impact_force_scale * float(frame["side_x_load"])
-        side_y_load.value = impact_force_scale * float(frame["side_y_load"])
+        side_x_load.value = impact_force_scale * effective_side_x_load
+        side_y_load.value = impact_force_scale * effective_side_y_load
 
         # Решаем упругую задачу для текущего кадра.
         solution = problem.solve()
@@ -484,7 +543,15 @@ def main() -> int:
         # накопленное смятие, которое уже не должно исчезать дальше.
         elastic_points = points + elastic_displacement + shift
         elastic_metrics = compute_deformation_metrics(points, elastic_points, min_point, max_point)
-        update_crush_state(crush_state, elastic_metrics, frame)
+        update_crush_state(
+            crush_state,
+            elastic_metrics,
+            effective_roof_load,
+            effective_side_x_load,
+            effective_side_y_load,
+            float(frame["roof_center_x"]),
+            float(frame["roof_center_y"]),
+        )
 
         permanent_displacement = build_permanent_crush_field(points, min_point, max_point, crush_state)
         total_displacement = permanent_displacement + elastic_visible_fraction * elastic_displacement

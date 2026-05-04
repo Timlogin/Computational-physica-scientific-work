@@ -1,4 +1,5 @@
 ## О проекте
+Теория и физ модель описана в папке `real_physics`
 
 Это микропроект по моделированию удара 2 тонн воды по кузову автомобиля с 50 метров.
 
@@ -94,15 +95,11 @@
 
 Основные файлы:
 
-- [src/main.cpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/main.cpp) — главный исполняемый файл, запуск симуляции и организация вывода
+- [src/main.cpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/main.cpp) — главный C++-файл: построение сетки `Gmsh`, запись `VTK`, запуск симуляции и режим просмотра сетки
 - [src/simulation.hpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/simulation.hpp) — основные структуры данных и параметры модели
 - [src/simulation.cpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/simulation.cpp) — реализация движения воды, столкновений и сбора нагрузок
-- [src/gmsh_box.hpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/gmsh_box.hpp) — структуры для сетки бокса
-- [src/gmsh_box.cpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/gmsh_box.cpp) — построение тетраэдральной сетки бокса через `gmsh`
 - [src/fenics_box_solver.py](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/fenics_box_solver.py) — расчёт деформации кузова через `FEniCSx`
-- [src/vtk_writer.hpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/vtk_writer.hpp) — объявления функций экспорта
-- [src/vtk_writer.cpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/vtk_writer.cpp) — экспорт воды, земли и сетки в VTK-форматы
-- [src/box_mesh_preview.cpp](/Users/timofejloginov/Documents/Computational-physica-scientific-work/src/box_mesh_preview.cpp) — отдельный режим для просмотра только сетки бокса
+- [real_physics/physics_model.tex](/Users/timofejloginov/Documents/Computational-physica-scientific-work/real_physics/physics_model.tex) — описание физической модели с формулами
 
 ## Модели
 
@@ -148,7 +145,7 @@
 - нелинейная динамика реального грунта;
 - точная геометрия минивэна;
 
-Поэтому результаты чисто ознокамительные
+Поэтому результаты чисто ознакомительные.
 
 ## Сборка проекта
 
@@ -159,10 +156,9 @@ cmake -S . -B build
 cmake --build build -j2
 ```
 
-После сборки появляются два основных исполняемых файла:
+После сборки появляется основной исполняемый файл:
 
 - `build/water_drop_demo`
-- `build/box_mesh_preview`
 
 ## Запуск проекта
 
@@ -179,7 +175,7 @@ cmake --build build -j2
 Если нужно отдельно посмотреть сетку кузова без воды:
 
 ```bash
-./build/box_mesh_preview
+./build/water_drop_demo --mesh-only
 ```
 
 Результаты сохраняются в:

@@ -86,8 +86,11 @@ void SphSimulation::step()
   _roof_impact_load = 0.0;
   _roof_impact_x_moment = 0.0;
   _roof_impact_y_moment = 0.0;
+  _roof_impact_impulse = 0.0;
   _side_x_impact_load = 0.0;
   _side_y_impact_load = 0.0;
+  _side_x_impact_impulse = 0.0;
+  _side_y_impact_impulse = 0.0;
   compute_density_and_pressure();
   compute_forces();
   integrate_particles();
@@ -115,8 +118,12 @@ void SphSimulation::compute_density_and_pressure()
 
     pi.density = std::max(density, _config.rest_density * 0.5);
 
-    // Давление считаем по линейной связи с плотностью
-    pi.pressure = _config.pressure_stiffness * (pi.density - _config.rest_density);
+    // Давление считаем по линейной связи с плотностью.
+    // Ниже нуля его не опускаем, чтобы убрать неустойчивое "растяжение"
+    // на свободной поверхности воды.
+    pi.pressure = std::max(
+        _config.pressure_floor,
+        _config.pressure_stiffness * (pi.density - _config.rest_density));
   }
 }
 
@@ -234,6 +241,17 @@ void SphSimulation::integrate_box()
 
 void SphSimulation::resolve_world_collision(Particle& particle)
 {
+  // Сразу над крышей оставляем дополнительное затухание вертикального всплеска.
+  // Это простая численная стабилизация: она не даёт частицам после удара
+  // слишком агрессивно "выстреливать" вверх из-за резкого локального сжатия.
+  const double roof_z = _box.center.z + 0.5 * _box.outer_size.z;
+  if (particle.position.z > roof_z
+      && particle.position.z < roof_z + _config.roof_splash_damping_height
+      && particle.velocity.z > 0.0)
+  {
+    particle.velocity.z *= (1.0 - _config.roof_splash_damping);
+  }
+
   // Контакт воды с землёй делаем почти неупругим
   // частица не подпрыгивает, а оседает
   if (particle.position.z < _config.ground.z)
@@ -273,18 +291,24 @@ void SphSimulation::resolve_box_collision(Particle& particle, const Vec3& previo
 {
   // Работаем в локальной системе координат бокса
   const Vec3 half_outer = _box.outer_size * 0.5;
+  const double top_limit = half_outer.z - _roof_collision_sink;
+  const double bottom_limit = -half_outer.z;
   const double surface_offset = _config.box_collision_margin;
   const Vec3 local = particle.position - _box.center;
   const Vec3 previous_local = previous_position - _box.center;
-  const bool inside_outer = std::abs(local.x) <= half_outer.x && std::abs(local.y) <= half_outer.y
-                            && std::abs(local.z) <= half_outer.z;
+  const bool inside_outer = std::abs(local.x) <= half_outer.x
+                            && std::abs(local.y) <= half_outer.y
+                            && local.z <= top_limit
+                            && local.z >= bottom_limit;
 
   if (!inside_outer)
     return;
 
   const double dx = half_outer.x - std::abs(local.x);
   const double dy = half_outer.y - std::abs(local.y);
-  const double dz = half_outer.z - std::abs(local.z);
+  const double dz_top = top_limit - local.z;
+  const double dz_bottom = local.z - bottom_limit;
+  const double dz = std::min(dz_top, dz_bottom);
 
   int axis = -1;
   double sign = 1.0;
@@ -299,10 +323,10 @@ void SphSimulation::resolve_box_collision(Particle& particle, const Vec3& previo
     axis = 1;
     sign = previous_local.y > 0.0 ? 1.0 : -1.0;
   }
-  else if (std::abs(previous_local.z) > half_outer.z)
+  else if (previous_local.z > top_limit || previous_local.z < bottom_limit)
   {
     axis = 2;
-    sign = previous_local.z > 0.0 ? 1.0 : -1.0;
+    sign = previous_local.z > top_limit ? 1.0 : -1.0;
   }
   else
   {
@@ -321,49 +345,97 @@ void SphSimulation::resolve_box_collision(Particle& particle, const Vec3& previo
     else if (axis == 1)
       sign = local.y >= 0.0 ? 1.0 : -1.0;
     else
-      sign = local.z >= 0.0 ? 1.0 : -1.0;
+      sign = dz_top < dz_bottom ? 1.0 : -1.0;
   }
 
   if (axis == 0)
   {
     // Столкновение со стенкой, нормаль которой направлена вдоль оси X
-    const double old_velocity = particle.velocity.x;
+    const double old_normal_velocity = particle.velocity.x;
+    const double old_tangent_y = particle.velocity.y;
+    const double old_tangent_z = particle.velocity.z;
     const double relative_velocity = particle.velocity.x - _box_velocity.x;
     particle.position.x = _box.center.x + sign * (half_outer.x + surface_offset);
     if (relative_velocity * sign < 0.0)
-      particle.velocity.x = _box_velocity.x - relative_velocity * _config.collision_damping;
-    const double force_delta = _config.particle_mass * (old_velocity - particle.velocity.x) / _config.dt;
+      particle.velocity.x = _box_velocity.x - relative_velocity * _config.wall_collision_restitution;
+    particle.velocity.y = old_tangent_y * (1.0 - _config.wall_tangential_damping);
+    particle.velocity.z = old_tangent_z * (1.0 - _config.wall_tangential_damping);
+
+    const double normal_impulse
+        = _config.particle_mass * std::abs(particle.velocity.x - old_normal_velocity);
+    const double force_delta = normal_impulse / _config.dt;
     _side_x_impact_load += std::abs(force_delta);
-    _box_force.x += force_delta * _config.rigid_body_impact_fraction;
+    _side_x_impact_impulse += normal_impulse;
+    _box_force.x += -sign * force_delta * _config.rigid_body_impact_fraction;
   }
   else if (axis == 1)
   {
     // Столкновение со стенкой, нормаль которой направлена вдоль оси Y
-    const double old_velocity = particle.velocity.y;
+    const double old_normal_velocity = particle.velocity.y;
+    const double old_tangent_x = particle.velocity.x;
+    const double old_tangent_z = particle.velocity.z;
     const double relative_velocity = particle.velocity.y - _box_velocity.y;
     particle.position.y = _box.center.y + sign * (half_outer.y + surface_offset);
     if (relative_velocity * sign < 0.0)
-      particle.velocity.y = _box_velocity.y - relative_velocity * _config.collision_damping;
-    const double force_delta = _config.particle_mass * (old_velocity - particle.velocity.y) / _config.dt;
+      particle.velocity.y = _box_velocity.y - relative_velocity * _config.wall_collision_restitution;
+    particle.velocity.x = old_tangent_x * (1.0 - _config.wall_tangential_damping);
+    particle.velocity.z = old_tangent_z * (1.0 - _config.wall_tangential_damping);
+
+    const double normal_impulse
+        = _config.particle_mass * std::abs(particle.velocity.y - old_normal_velocity);
+    const double force_delta = normal_impulse / _config.dt;
     _side_y_impact_load += std::abs(force_delta);
-    _box_force.y += force_delta * _config.rigid_body_impact_fraction;
+    _side_y_impact_impulse += normal_impulse;
+    _box_force.y += -sign * force_delta * _config.rigid_body_impact_fraction;
   }
   else
   {
     // Столкновение со стенкой, нормаль которой направлена вдоль оси Z
-    const double old_velocity = particle.velocity.z;
+    const double old_normal_velocity = particle.velocity.z;
+    const double old_tangent_x = particle.velocity.x;
+    const double old_tangent_y = particle.velocity.y;
     const double relative_velocity = particle.velocity.z - _box_velocity.z;
-    particle.position.z = _box.center.z + sign * (half_outer.z + surface_offset);
+    particle.position.z = _box.center.z + (sign > 0.0 ? top_limit + surface_offset : bottom_limit - surface_offset);
     if (relative_velocity * sign < 0.0)
-      particle.velocity.z = _box_velocity.z - relative_velocity * _config.collision_damping;
-    const double force_delta = _config.particle_mass * (old_velocity - particle.velocity.z) / _config.dt;
+    {
+      const double restitution = sign > 0.0
+          ? _config.roof_collision_restitution
+          : _config.wall_collision_restitution;
+      particle.velocity.z = _box_velocity.z - relative_velocity * restitution;
+    }
 
     if (sign > 0.0)
     {
-      const double roof_load = std::max(0.0, -force_delta);
+      particle.velocity.x = old_tangent_x * (1.0 - _config.roof_tangential_damping);
+      particle.velocity.y = old_tangent_y * (1.0 - _config.roof_tangential_damping);
+      particle.velocity.z = std::min(
+          particle.velocity.z,
+          _box_velocity.z + _config.roof_max_rebound_speed);
+    }
+    else
+    {
+      particle.velocity.x = old_tangent_x * (1.0 - _config.wall_tangential_damping);
+      particle.velocity.y = old_tangent_y * (1.0 - _config.wall_tangential_damping);
+    }
+
+    const double normal_impulse
+        = _config.particle_mass * std::abs(particle.velocity.z - old_normal_velocity);
+    const double force_delta = normal_impulse / _config.dt;
+
+    if (sign > 0.0)
+    {
+      const double roof_load = std::abs(force_delta);
       _roof_impact_load += roof_load;
       _roof_impact_x_moment += roof_load * local.x;
       _roof_impact_y_moment += roof_load * local.y;
+      _roof_impact_impulse += normal_impulse;
+
+      // После сильного удара крыша в контактной модели опускается.
+      // Благодаря этому следующая вода не застревает на старой плоскости крыши,
+      // а проходит в область уже смятого кузова.
+      _roof_collision_sink = std::min(
+          _config.max_roof_collision_sink,
+          _roof_collision_sink + _config.roof_sink_per_impulse * normal_impulse);
     }
     else
     {

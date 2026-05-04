@@ -28,38 +28,23 @@ find_library(GMSH_LIBRARY gmsh
 
 add_executable(water_drop_demo
   src/main.cpp
-  src/gmsh_box.cpp
   src/simulation.cpp
-  src/vtk_writer.cpp
-)
-
-add_executable(box_mesh_preview
-  src/box_mesh_preview.cpp
-  src/gmsh_box.cpp
-  src/simulation.cpp
-  src/vtk_writer.cpp
 )
 
 target_include_directories(water_drop_demo PRIVATE src)
-target_include_directories(box_mesh_preview PRIVATE src)
 
 target_include_directories(water_drop_demo PRIVATE ${GMSH_INCLUDE_DIR})
-target_include_directories(box_mesh_preview PRIVATE ${GMSH_INCLUDE_DIR})
 
 target_link_libraries(water_drop_demo PRIVATE ${GMSH_LIBRARY})
-target_link_libraries(box_mesh_preview PRIVATE ${GMSH_LIBRARY})
 target_link_libraries(water_drop_demo PRIVATE VTK::CommonCore VTK::CommonDataModel VTK::IOXML)
-target_link_libraries(box_mesh_preview PRIVATE VTK::CommonCore VTK::CommonDataModel VTK::IOXML)
 
 vtk_module_autoinit(
-  TARGETS water_drop_demo box_mesh_preview
+  TARGETS water_drop_demo
   MODULES VTK::CommonCore VTK::CommonDataModel VTK::IOXML
 )
 
 if(MSVC)
   target_compile_options(water_drop_demo PRIVATE /W4)
-  target_compile_options(box_mesh_preview PRIVATE /W4)
 else()
   target_compile_options(water_drop_demo PRIVATE -Wall -Wextra -Wpedantic)
-  target_compile_options(box_mesh_preview PRIVATE -Wall -Wextra -Wpedantic)
 endif()

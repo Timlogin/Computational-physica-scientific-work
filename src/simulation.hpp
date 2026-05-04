@@ -80,6 +80,7 @@ struct SimulationConfig
   double particle_mass = 1.0;        // Масса одной частицы, позже пересчитывается.
   double rest_density = 1000.0;      // Опорная плотность воды.
   double pressure_stiffness = 120.0; // Коэффициент связи давления и плотности.
+  double pressure_floor = 0.0;       // Нижняя граница давления, чтобы не было неустойчивого "растяжения" воды.
   double viscosity = 24.0;           // Коэффициент вязкости.
   double air_drag = 0.05;            // Сопротивление воздуха для частиц воды.
   double visual_particle_radius = 0.22; // Радиус частицы только для визуализации.
@@ -96,6 +97,15 @@ struct SimulationConfig
   double box_mesh_size = 0.16;         // Типичный размер тетраэдра в сетке бокса.
   double box_air_drag = 30.0;          // Сопротивление воздуха для движения бокса как тела.
   double rigid_body_impact_fraction = 0.10; // Какая доля удара идёт в перенос бокса как целого тела.
+  double roof_collision_restitution = 0.03; // Доля нормальной скорости, которая остаётся после удара о крышу.
+  double wall_collision_restitution = 0.10; // Доля нормальной скорости после удара о боковые стенки.
+  double roof_tangential_damping = 0.55;    // Потеря касательной скорости по крыше, чтобы вода меньше подпрыгивала.
+  double wall_tangential_damping = 0.20;    // Потеря касательной скорости по боковым стенкам.
+  double roof_max_rebound_speed = 0.35;     // Максимальная вертикальная скорость частицы сразу после удара о крышу.
+  double roof_splash_damping_height = 0.60; // Высота слоя над крышей, где дополнительно гасим слишком резкий вертикальный всплеск.
+  double roof_splash_damping = 0.55;        // Насколько сильно подавляем вертикальный всплеск воды сразу над крышей.
+  double roof_sink_per_impulse = 0.000020;  // Насколько быстро крыша в контактной модели уходит вниз от импульса воды.
+  double max_roof_collision_sink = 1.45;    // Максимальное опускание контактной плоскости крыши.
   double roof_elastic_stiffness = 180000.0; // Жёсткость крыши в упрощённой модели.
   double floor_elastic_stiffness = 950000.0; // Жёсткость днища в упрощённой модели.
   double wall_elastic_stiffness = 420000.0;  // Жёсткость боковых стенок в упрощённой модели.
@@ -139,8 +149,11 @@ public:
   {
     return _roof_impact_load > 1e-9 ? _roof_impact_y_moment / _roof_impact_load : 0.0;
   }
+  double roof_impact_impulse() const { return _roof_impact_impulse; }
   double side_x_impact_load() const { return _side_x_impact_load; }
   double side_y_impact_load() const { return _side_y_impact_load; }
+  double side_x_impact_impulse() const { return _side_x_impact_impulse; }
+  double side_y_impact_impulse() const { return _side_y_impact_impulse; }
   double box_mass() const { return _box_mass; }
   int current_step() const { return _current_step; }
   double current_time() const { return _current_time; }
@@ -176,8 +189,12 @@ private:
   double _roof_impact_load = 0.0;   // Нагрузка на крышу на текущем шаге.
   double _roof_impact_x_moment = 0.0; // Момент нагрузки по X для поиска центра удара.
   double _roof_impact_y_moment = 0.0; // Момент нагрузки по Y для поиска центра удара.
+  double _roof_impact_impulse = 0.0; // Суммарный импульс, переданный крыше за текущий шаг.
   double _side_x_impact_load = 0.0; // Боковая нагрузка на стенки, нормальные к X.
   double _side_y_impact_load = 0.0; // Боковая нагрузка на стенки, нормальные к Y.
+  double _side_x_impact_impulse = 0.0; // Импульс удара в стенки, нормальные к X.
+  double _side_y_impact_impulse = 0.0; // Импульс удара в стенки, нормальные к Y.
+  double _roof_collision_sink = 0.0; // Насколько опустилась крыша для контакта воды с уже смятым боксом.
   BoxElasticDeformation _box_deformation{}; // Упрощённая C++-деформация для отладки и экспорта.
   double _box_mass = 1.0;           // Эффективная масса стенок бокса.
   int _current_step = 0;            // Номер текущего шага по времени.

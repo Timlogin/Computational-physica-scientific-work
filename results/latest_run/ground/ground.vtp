@@ -8,9 +8,6 @@
         <DataArray type="Float64" Name="normal_stiffness" format="ascii" RangeMin="280000" RangeMax="280000">
           280000
         </DataArray>
-        <DataArray type="Float64" Name="lateral_stiffness" format="ascii" RangeMin="120000" RangeMax="120000">
-          120000
-        </DataArray>
         <DataArray type="Float64" Name="max_sink" format="ascii" RangeMin="0.03" RangeMax="0.03">
           0.03
         </DataArray>
