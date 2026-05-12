@@ -1,0 +1,3 @@
+/Users/timofejloginov/Documents/Computational-physica-scientific-work/sph_building_demo/build/CMakeFiles/sph_building_demo.dir
+/Users/timofejloginov/Documents/Computational-physica-scientific-work/sph_building_demo/build/CMakeFiles/edit_cache.dir
+/Users/timofejloginov/Documents/Computational-physica-scientific-work/sph_building_demo/build/CMakeFiles/rebuild_cache.dir
